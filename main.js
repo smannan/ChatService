@@ -45,6 +45,7 @@ app.use(CnnPool.router);
 app.use('/Prss', require('./Routes/Account/Prss.js'));
 app.use('/Ssns', require('./Routes/Account/Ssns.js'));
 app.use('/Cnvs', require('./Routes/Conversation/Cnvs.js'));
+app.use('/Msgs', require('./Routes/Conversation/Msgs.js'));
 
 // Special debugging route for /DB DELETE.  Clears all table contents,
 // resets all auto_increment keys to start at 1, and reinserts one admin user.
@@ -120,9 +121,11 @@ app.delete('/DB', function(req, res) {
              callback);
          },
          function(callback){
-            for (var session in Session.sessions)
+            for (var session in Session.sessions) {
                delete Session.sessions[session];
-            res.send();
+            }
+            res.send(200).end();
+            callback();
          }
       ],
       function(err, status) {
@@ -134,13 +137,10 @@ app.delete('/DB', function(req, res) {
 
 // Handler of last resort.  Print a stacktrace to console and send a 500 response.
 app.use(function(req, res, next) {
-   console.log('NOT FOUND');
-   console.log(req.path);
-   console.log(req.session);
    res.status(404).end();
    req.cnn.release();
 });
 
-app.listen(3000 + parseInt(process.argv[2]), function () {
+app.listen(3000 + parseInt(process.argv[3]), function () {
    console.log('App Listening on port 3016');
 });

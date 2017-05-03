@@ -1,4 +1,4 @@
-var Express = require('express');
+var Express = require('express'); 
 var Tags = require('../Validator.js').Tags;
 var router = Express.Router({caseSensitive: true});
 var async = require('async');
@@ -9,8 +9,8 @@ router.baseURL = '/Prss';
 /*
 */
 router.get('/', function(req, res) {
-   var email = req.session.isAdmin() && req.query.email ||
-    !req.session.isAdmin() && req.session.email;
+   var email = (req.session.isAdmin() && req.query.email) ||
+    (!req.session.isAdmin() && req.session.email === req.query.email);
    var cnnConfig = {
       host     : 'localhost',
       user     : 'smannan',
@@ -21,9 +21,10 @@ router.get('/', function(req, res) {
    req.cnn.release();  // Since we're not using that
 
    var cnn = mysql.createConnection(cnnConfig);
+   vld = req.validator;
 
-   if (email)
-      cnn.query('select id, email from Person where email = ?', [email],
+   if (email) {
+      cnn.query('select id, email from Person where email = ?', [req.params.email],
       function(err, result) {
          if (err) {
             cnn.destroy();
@@ -34,8 +35,17 @@ router.get('/', function(req, res) {
             res.status(200).json(result);
          }
       });
-   else
-      cnn.query('select id, email from Person',
+   }
+   else 
+      var sql = 'select id, email from Person';
+      params = null;
+
+      if (!req.session.isAdmin()) {
+         sql += ' where id = ?';
+         params = [req.session.id];
+      }
+
+      cnn.query(sql, params,
       function(err, result) {
          if (err) {
             cnn.destroy();
@@ -239,7 +249,7 @@ router.delete('/:id', function(req, res) {
    var vld = req.validator;
 
    if (vld.checkAdmin())
-      req.cnn.query('DELETE from Person where id = ?', [req.body.id],
+      req.cnn.query('DELETE from Person where id = ?', [req.params.id],
       function (err, result) {
          if (!err || vld.check(result.affectedRows, Tags.notFound))
             res.status(200).end();
