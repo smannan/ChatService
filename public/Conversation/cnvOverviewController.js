@@ -8,14 +8,15 @@ app.controller('cnvOverviewController',
       $scope.dlgTitle = "New Conversation";
       var selectedTitle;
 
+      // open dialog to add new convs title
       $uibM.open({
          templateUrl: 'Conversation/editCnvDlg.template.html',
          scope: $scope
       }).result
-      .then(function(newTitle) {
+      .then(function(newTitle) { // posts a new cnvs
          return $http.post("Cnvs", {title: newTitle});
       })
-      .then(function() {
+      .then(function() { // gets the newly created cnvs
          return $http.get('/Cnvs');
       })
       .then(function(rsp) {

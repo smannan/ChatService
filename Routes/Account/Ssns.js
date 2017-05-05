@@ -26,8 +26,7 @@ router.post('/', function(req, res) {
    cnn.query('select * from Person where email = ?', [req.body.email],
    function(err, result) {
       if (req.validator.check(result.length && result[0].password ===
-       req.body.password, Tags.badLogin)) {
-         // ssnUtil.deleteSession(req.cookies['CHSAuth']);
+       req.body.password, Tags.badLogin)) { 
          cookie = ssnUtil.makeSession(result[0], res);
          req.session = ssnUtil.sessions[cookie];
          res.location(router.baseURL + '/' + cookie).status(200).end();
@@ -40,8 +39,7 @@ router.delete('/:cookie', function(req, res, next) {
    var admin = req.session && req.session.isAdmin();
    if (admin || req.validator.check(req.params.cookie === req.cookies[ssnUtil.cookieName],
     Tags.noPermission, null)) {
-
-      ssnUtil.deleteSession(req.params.cookie);
+      ssnUtil.deleteSession(req.cookies[ssnUtil.cookieName]);
       res.status(200).end();
    }
    req.cnn.release();
@@ -52,7 +50,6 @@ router.get('/:cookie', function(req, res, next) {
    var vld = req.validator;
 
    if (vld.checkPrsOK(ssnUtil.sessions[cookie].id)) {
-      console.log(req.session);
       res.json({prsId: req.session.id, loginTime: req.session.loginTime, cookie: req.params.cookie });
    }
    req.cnn.release();

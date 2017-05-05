@@ -7,6 +7,7 @@ router.baseURL = '/Msgs';
 
 router.get('/:msgId', function(req, res) {
    console.log('GETTING MSGS');
+   console.log(msgId);
 
    var vld = req.validator;
    var msgId = req.params.msgId;
@@ -17,13 +18,13 @@ router.get('/:msgId', function(req, res) {
 
    async.waterfall([
       function(cb) {  // Check for existence of conversation
+
          cnn.chkQry('select * from Message where id = ?', [msgId], cb);
       },
       function(cnvs, fields, cb) { // Get indicated messages
-         console.log('GOT MSGS');
-         console.log(cnvs);
-         if (vld.check(cnvs.length, Tags.notFound, null, cb)) // status 401 if message doesn't exist
+         if (vld.check(cnvs.length, Tags.notFound, null, cb)) {// status 401 if message doesn't exist
             cnn.chkQry(query, params, cb);
+         }
       },
       function(msgs, fields, cb) { // Return retrieved messages
          res.json(msgs[0]);

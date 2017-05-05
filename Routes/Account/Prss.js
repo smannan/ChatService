@@ -10,7 +10,7 @@ router.baseURL = '/Prss';
 */
 router.get('/', function(req, res) {
    var email = (req.session.isAdmin() && req.query.email) ||
-    (!req.session.isAdmin() && req.session.email === req.query.email);
+    (!req.session.isAdmin() && req.query.email);
    var cnnConfig = {
       host     : 'localhost',
       user     : 'smannan',
@@ -24,19 +24,22 @@ router.get('/', function(req, res) {
    vld = req.validator;
 
    if (email) {
-      cnn.query('select id, email from Person where email = ?', [req.params.email],
+      cnn.query('select id, email from Person where email = ?', [req.query.email],
       function(err, result) {
          if (err) {
             cnn.destroy();
             res.status(500).json("Failed query");
          }
          else {
+            if (req.query.email != req.session.email) {
+               result = [];
+            }
             cnn.destroy();
             res.status(200).json(result);
          }
       });
    }
-   else 
+   else {
       var sql = 'select id, email from Person';
       params = null;
 
@@ -56,6 +59,7 @@ router.get('/', function(req, res) {
             res.status(200).json(result);
          }
       });
+   }
 });
 
 /*
