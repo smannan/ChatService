@@ -141,6 +141,6 @@ app.use(function(req, res, next) {
    req.cnn.release();
 });
 
-app.listen(3000 + parseInt(process.argv[3]), function () {
-   console.log('App Listening on port 3016');
+app.listen(parseInt(process.argv[3]), function () {
+   console.log('App Listening on port');
 });

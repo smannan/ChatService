@@ -11,33 +11,24 @@ router.baseURL = '/Prss';
 router.get('/', function(req, res) {
    var email = (req.session.isAdmin() && req.query.email) ||
     (!req.session.isAdmin() && req.query.email);
-   var cnnConfig = {
-      host     : 'localhost',
-      user     : 'smannan',
-      password : 'S2n0j1m6',
-      database : 'smannan'
-   };
 
-   req.cnn.release();  // Since we're not using that
-
-   var cnn = mysql.createConnection(cnnConfig);
+   var cnn = req.cnn;
    vld = req.validator;
 
    if (email) {
       cnn.query('select id, email from Person where email = ?', [req.query.email],
       function(err, result) {
          if (err) {
-            cnn.destroy();
             res.status(500).json("Failed query");
          }
          else {
             if (req.query.email != req.session.email) {
                result = [];
             }
-            cnn.destroy();
             res.status(200).json(result);
          }
       });
+      cnn.release();
    }
    else {
       var sql = 'select id, email from Person';
@@ -51,14 +42,13 @@ router.get('/', function(req, res) {
       cnn.query(sql, params,
       function(err, result) {
          if (err) {
-            cnn.destroy();
             res.status(500).json("Failed query");
          }
          else {
-            cnn.destroy();
             res.status(200).json(result);
          }
       });
+      cnn.release();
    }
 });
 
