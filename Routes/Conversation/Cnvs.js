@@ -142,23 +142,25 @@ router.delete('/:cnvId', function(req, res) {
    var cnn = req.cnn;
    var admin = req.session && req.session.isAdmin();
 
-   console.log('DELETE');
-
    async.waterfall([
+   /* Get the existing conversation */
    function(cb) {
-      console.log('GETTING CNVS');
       cnn.chkQry('select * from Conversation where id = ?', [cnvId], cb);
    },
+
+   /* Make sure conversation exists
+    * and that the person deleting the
+    * conversation is the correct AU.
+    * If so, delete the conversation.
+   */
    function(cnvs, fields, cb) {
-      console.log('PERSON');
-      console.log(cnvs[0].ownerId);
       if (vld.check(cnvs.length, Tags.notFound, null, cb) &&
        vld.checkPrsOK(cnvs[0].ownerId, cb)) { 
-         console.log('DELETING CONVS');
-         console.log(cnvId)
          cnn.chkQry('delete from Conversation where id = ?', [cnvId], cb);
       }
    }],
+
+   /* Release the db connection */
    function(err) {
       if (!err) {
          res.status(200).end();
@@ -167,76 +169,98 @@ router.delete('/:cnvId', function(req, res) {
    });
 });
 
+/* Get all messages from the specified conversation id */
 router.get('/:cnvId/Msgs', function(req, res) {
-   console.log(new Date());
    var vld = req.validator;
    var cnvId = req.params.cnvId;
    var cnn = req.cnn;
-   var query = 'select whenMade, email, content, m.id as id from Conversation c' +
-    ' join Message m on cnvId = c.id join Person p on prsId = p.id where c.id = ?' +
-    ' and m.whenMade <= ? ' +
+   var query = 'select whenMade, email, content, m.id as id from ' + 
+    ' Conversation c join Message m on cnvId = c.id join Person ' +
+    ' p on prsId = p.id where c.id = ? and m.whenMade <= ? ' +
     ' order by whenMade asc';
 
    var params = [cnvId];
 
+   /* Limit to conversations posted before datetime
+    * if specified in the request query.
+    */
    if (req.query.dateTime) {
       params.push(req.query.dateTime);
    }
 
+   /* If not datetime is given, get all conversations
+    * posted before the current datetime.
+    */
    else {
       params.push(new Date());
    }
 
-   // And finally add a limit clause and parameter if indicated.
+   /* And finally add a limit clause and parameter if indicated. */
    if (req.query.num) {
       query += ' limit ?';
       params.push(parseInt(req.query.num));
    }
 
    async.waterfall([
-   function(cb) {  // Check for existence of conversation
+   /* Check for existence of conversation */
+   function(cb) {  
       cnn.chkQry('select * from Conversation where id = ?', [cnvId], cb);
    },
-   function(cnvs, fields, cb) { // Get indicated messages
+
+   /* Get indicated messages if the conversation exists */
+   function(cnvs, fields, cb) { 
       if (vld.check(cnvs.length, Tags.notFound, null, cb)) {
          cnn.chkQry(query, params, cb);
       }
    },
-   function(msgs, fields, cb) { // Return retrieved messages
+
+   /* Return retrieved messages */
+   function(msgs, fields, cb) { 
       res.status(200).json(msgs);
       cb();
    }],
+
+   /* Release the db connection */
    function(err){
       cnn.release();
    });
 });
 
-router.post('/:cnvId/Msgs', function(req, res){
+/* Post a new message to the specified conversation */
+router.post('/:cnvId/Msgs', function(req, res) {
    var vld = req.validator;
    var cnn = req.cnn;
    var cnvId = req.params.cnvId;
    var body = req.body;
 
    async.waterfall([
+   /* Get the existing conversation */
    function(cb) {
-      console.log(cnvId);
       cnn.chkQry('select * from Conversation where id = ?', [cnvId], cb);
    },
-   function(cnvs, fields, cb) {
-      if (vld.check(cnvs.length, Tags.notFound, null, cb) &&
-         vld.check(body.content.length < 500, Tags.badValue, ["content"], cb)) 
-      {
-            new_message = {cnvId: cnvId, prsId: req.session.id,
-             whenMade: date = new Date(), content: req.body.content};
 
-            cnn.chkQry("insert into Message set ?", [new_message], cb);
+   /* If the conversation exists and the body content is 
+    * less than 500 characters, post the new message.
+    */
+   function(cnvs, fields, cb) {
+
+      if (vld.check(cnvs.length, Tags.notFound, null, cb) &&
+       vld.check(body.content.length < 500, Tags.badValue, 
+        ["content"], cb)) {
+
+         new_message = {cnvId: cnvId, prsId: req.session.id,
+         whenMade: date = new Date(), content: req.body.content};
+         cnn.chkQry("insert into Message set ?", [new_message], cb);
       }
    },
+
    function(insRes, fields, cb) {
       res.location(router.baseURL + '/' + insRes.insertId).end();
       cnn.chkQry("update Conversation set lastMessage = ? where id = ?",
        [new Date(), cnvId], cb);
    }],
+
+   /* Release db connection */
    function(err) {
       cnn.release();
    });
