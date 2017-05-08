@@ -31,7 +31,8 @@ router.get('/', function(req, res) {
       cnn.release();
    }
    else {
-      var sql = 'select id, email from Person';
+   	  console.log('GETTING PERSON');
+      var sql = 'select email, firstName, lastName, role, id, termsAccepted, whenRegistered from Person';
       params = null;
 
       if (!req.session.isAdmin()) {
