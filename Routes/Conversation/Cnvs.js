@@ -5,11 +5,18 @@ var async = require('async');
 
 router.baseURL = '/Cnvs';
 
+/* Get all conversations from the db 
+ * Send a response with conversation
+ * id, title, owner id, and last message
+*/
 router.get('/', function(req, res) {
    var owner = req.query.owner;
    var query = 'select id, title, ownerId, lastMessage from Conversation';
    var params = [];
 
+   /* limited to Conversations with the specified 
+    * owner if query param is given
+   */
    if (owner) {
       query += ' where ownerId = ?';
       params = [owner];
@@ -24,6 +31,11 @@ router.get('/', function(req, res) {
    });
 });
 
+/* Get conversation with the specified
+ * conversation id.
+ * Send a response with conversation
+ * id, title, owner id, and last message
+*/
 router.get('/:cnvId', function(req, res) {
    var vld = req.validator;
    var body = req.body;
@@ -31,57 +43,59 @@ router.get('/:cnvId', function(req, res) {
 
    async.waterfall([
    function(cb) {
-      cnn.chkQry('select id, title, ownerId, lastMessage from Conversation where id = ?', [req.params.cnvId], cb);
+      cnn.chkQry('select id, title, ownerId, lastMessage from ' +
+       ' Conversation where id = ?', [req.params.cnvId], cb);
    },
+
    function(cnvs, fields, cb) {
-      if (vld.check(cnvs.length, Tags.notFound, null, cb)) 
-      {
-            res.json(cnvs[0]);
-            cb();
+      /* Not found if conversation does not exist. */
+      if (vld.check(cnvs.length, Tags.notFound, null, cb)) {
+         res.json(cnvs[0]);
+         cb();
       }
    }],
+
    function() {
       cnn.release();
    });
-   /*
-   req.cnn.chkQry('select id, title, ownerId, lastMessage from Conversation where id = ?', [req.params.cnvId],
-   function(err, cnvs) {
-      if (!err) {
-         res.json(cnvs[0]);
-      }
-      req.cnn.release();
-   });*/
 });
 
+/* Post a new conversation */
 router.post('/', function(req, res) {
    var vld = req.validator;
    var body = req.body;
    var cnn = req.cnn;
 
-   console.log('POSTING NEW CNVS');
-   console.log(body);
-
    async.waterfall([
    function(cb) {
-      cnn.chkQry('select * from Conversation where title = ?', body.title, cb);
+      cnn.chkQry('select * from Conversation where title = ?', 
+       body.title, cb);
    },
+
    function(existingCnv, fields, cb) {
+      /* Title limited to 80 chars 
+       * Duplicate title error if the conversation
+       * already exists.
+      */
       if (vld.chain(body.title.length < 80, Tags.badValue, null)
-         .check(!existingCnv.length, Tags.dupTitle, null, cb)) 
-      {
-            body.ownerId = req.session.id;
-            cnn.chkQry("insert into Conversation set ?", body, cb);
+       .check(!existingCnv.length, Tags.dupTitle, null, cb)) {
+         body.ownerId = req.session.id;
+         cnn.chkQry("insert into Conversation set ?", body, cb);
       }
    },
+
    function(insRes, fields, cb) {
       res.location(router.baseURL + '/' + insRes.insertId).end();
       cb();
    }],
+
+   /* Finally, release the db connection */
    function() {
       cnn.release();
    });
 });
 
+/* Update an existing conversation */
 router.put('/:cnvId', function(req, res) {
    var vld = req.validator;
    var body = req.body;
@@ -89,20 +103,30 @@ router.put('/:cnvId', function(req, res) {
    var cnvId = req.params.cnvId;
 
    async.waterfall([
+   /* Get the conversation with specified id */
    function(cb) {
-      cnn.chkQry('select * from Conversation where id = ?', [cnvId], cb);
+      cnn.chkQry('select * from Conversation where id = ?', 
+       [cnvId], cb);
    },
+
+   /* Make sure conversation exists and person 
+    * updating the conversation is the correct AU.
+    */
    function(cnvs, fields, cb) {
       if (vld.check(cnvs.length, Tags.notFound, null, cb) &&
-       vld.checkPrsOK(cnvs[0].ownerId, cb))
+       vld.checkPrsOK(cnvs[0].ownerId, cb)) {
+
          cnn.chkQry('select * from Conversation where id <> ? && title = ?',
           [cnvId, body.title], cb);
+      }
    },
+
    function(sameTtl, fields, cb) {
       if (vld.check(!sameTtl.length, Tags.dupTitle, cb))
          cnn.chkQry("update Conversation set title = ? where id = ?",
           [body.title, cnvId], cb);
    }],
+
    function(err) {
       if (!err) {
          res.status(200).end();
@@ -111,6 +135,7 @@ router.put('/:cnvId', function(req, res) {
    });
 });
 
+/* Delete an existing conversation */
 router.delete('/:cnvId', function(req, res) {
    var vld = req.validator;
    var cnvId = req.params.cnvId;
