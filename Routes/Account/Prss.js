@@ -87,7 +87,7 @@ router.post('/', function(req, res) {
    var cnn = req.cnn;
 
    if (admin && !body.password) {
-      // Blocking password
+      /* Blocking password */
       body.password = "*";   
    }                
    body.whenRegistered = new Date();

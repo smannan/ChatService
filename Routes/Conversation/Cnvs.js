@@ -79,7 +79,10 @@ router.post('/', function(req, res) {
       */
       if (vld.chain(body.title.length < 80, Tags.badValue, null)
        .check(!existingCnv.length, Tags.dupTitle, null, cb)) {
+
+         console.log('POSTING NEW CNVS');
          body.ownerId = req.session.id;
+         console.log(body);
          cnn.chkQry("insert into Conversation set ?", body, cb);
       }
    },
@@ -122,9 +125,10 @@ router.put('/:cnvId', function(req, res) {
    },
 
    function(sameTtl, fields, cb) {
-      if (vld.check(!sameTtl.length, Tags.dupTitle, cb))
+      if (vld.check(!sameTtl.length, Tags.dupTitle, null, cb)) {
          cnn.chkQry("update Conversation set title = ? where id = ?",
           [body.title, cnvId], cb);
+      }
    }],
 
    function(err) {
@@ -176,7 +180,7 @@ router.get('/:cnvId/Msgs', function(req, res) {
    var cnn = req.cnn;
    var query = 'select whenMade, email, content, m.id as id from ' + 
     ' Conversation c join Message m on cnvId = c.id join Person ' +
-    ' p on prsId = p.id where c.id = ? and m.whenMade <= ? ' +
+    ' p on prsId = p.id where c.id = ? and m.whenMade < ? ' +
     ' order by whenMade asc';
 
    var params = [cnvId];
