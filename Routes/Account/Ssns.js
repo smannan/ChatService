@@ -40,7 +40,6 @@ router.post('/', function(req, res) {
       if (req.validator.check(result.length && result[0].password ===
        req.body.password, Tags.badLogin)) { 
          cookie = ssnUtil.makeSession(result[0], res);
-         req.session = ssnUtil.sessions[cookie];
          res.location(router.baseURL + '/' + cookie).status(200).end();
       }
       cnn.release();
@@ -50,14 +49,24 @@ router.post('/', function(req, res) {
 /* Log someone out, or delete a session. */
 router.delete('/:cookie', function(req, res, next) {
    var admin = req.session && req.session.isAdmin();
-
+   var sess = ssnUtil.sessions;
+   
    /* AU must be person in question or admin 
     * if AU is correct, delete the session.
     */
-   if (admin || req.validator.check(req.params.cookie === 
-    req.cookies[ssnUtil.cookieName], Tags.noPermission, null)) {
-
-      ssnUtil.deleteSession(req.cookies[ssnUtil.cookieName]);
+   console.log('DELETING A SESSION');
+   console.log('PARAMS COOKIE');
+   console.log(req.params.cookie);
+   console.log('SESSION TO DELETE');
+   console.log(req.cookies[ssnUtil.cookieName]);
+   console.log(ssnUtil.sessions[req.params.cookie]);
+   console.log(req.session);
+   
+   //if (admin || req.validator.check(req.params.cookie === 
+   // req.cookies[ssnUtil.cookieName], Tags.noPermission, null)) {
+   if (admin || req.validator.check(req.session.id === 
+    ssnUtil.sessions[req.params.cookie].id, Tags.noPermission, null)) {
+      ssnUtil.deleteSession(req.params.cookie);
       res.status(200).end();
    }
 
@@ -76,7 +85,6 @@ router.get('/:cookie', function(req, res, next) {
     * session.
     */
    if (vld.checkPrsOK(ssnUtil.sessions[cookie].id)) {
-
       res.json({prsId: req.session.id, loginTime: 
        req.session.loginTime, cookie: req.params.cookie });
    }

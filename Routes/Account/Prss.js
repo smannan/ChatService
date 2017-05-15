@@ -21,14 +21,20 @@ router.get('/', function(req, res)
 
    var cnn = req.cnn;
    vld = req.validator;
-
+   
+   var admin = req.session && req.session.isAdmin();
+   
    /* 
    * if the request query has an email just
    * return id and email.
    */
    if (email) {
-      cnn.query('select id, email from Person where ' + 
-       ' email = ?', [req.query.email],
+      var sql = 'select id, email from Person where ' +
+       ' substring(email, 1, ' + req.query.email.length +
+       ' ) = ?';
+
+      cnn.query(sql, [req.query.email],
+      
       function(err, result) {
          if (err) {
             res.status(500).json("Failed query");
@@ -39,10 +45,14 @@ router.get('/', function(req, res)
             * trying to request an email of someone other
             * then AU will result in an empty list.
             */
-            if (req.query.email != req.session.email) {
-               result = [];
+            var students = [];
+            for (idx = 0; result.length && idx < result.length; idx++) {
+               if (admin || (result[idx].id === req.session.id)) {
+                  students.push(result[idx]);
+               }
             }
-            res.status(200).json(result);
+             
+            res.status(200).json(students);
          }
       });
 
@@ -50,8 +60,7 @@ router.get('/', function(req, res)
    }
 
    else {
-      var sql = 'select email, firstName, lastName, role, ' +
-       ' id, termsAccepted, whenRegistered from Person';
+      var sql = 'select email, id from Person';
       params = null;
 
       /* if AU is not admin only return
@@ -85,29 +94,30 @@ router.post('/', function(req, res) {
    var body = req.body;
    var admin = req.session && req.session.isAdmin();
    var cnn = req.cnn;
-
+   
    if (admin && !body.password) {
       /* Blocking password */
       body.password = "*";   
    }                
-   body.whenRegistered = new Date();
-
+   body.whenRegistered = (new Date()).toISOString().slice(0, 19)
+    .replace('T', ' ');
+   
    async.waterfall([
    function(cb) { 
       /* Make sure registration has all required information */
       if (vld.hasFields(body, ["email", "lastName", "password", 
        "role"], cb) &&
-
+       
        /* non-empty password required unless AU is admin */
        vld.chain(admin || (!admin && body.password), Tags.missingField, 
         ["password"])
-
+       
        /* Error forbiddenRole if role is not student unless AU is admin. */
-       .chain(body.role === 0 || admin, Tags.noPermission)
-
+       .chain(body.role === 0 || admin, Tags.noPermission, null)
+       
        /* Error if terms were not accepted and AU is not admin. */
-       .chain(body.termsAccepted || admin, Tags.noTerms)
-
+       .chain(body.termsAccepted || admin, Tags.noTerms, null)
+       
        /* Error bad value if role is not 0 or 1 */
        .check(body.role === 0 || body.role === 1, Tags.badValue, 
         ["role"], cb)) {
@@ -120,8 +130,18 @@ router.post('/', function(req, res) {
 
       /* Error duplicate email if the person exists */
       if (vld.check(!existingPrss.length, Tags.dupEmail, null, cb)) {
-         body.termsAccepted = ((admin && !body.termsAccepted )&& new Date())
-          || (body.termsAccepted && new Date());
+         // body.termsAccepted = ((admin && !body.termsAccepted )&& new Date())
+         // || (body.termsAccepted && new Date());
+         if (body.termsAccepted) { 
+            body.termsAccepted = (new Date()).toISOString().slice(0, 19)
+             .replace('T', ' ');
+         }
+         else {
+            body.termsAccepted = null;
+         }
+         
+         console.log('INSERTING A PERSON');
+         console.log(body);
          cnn.chkQry('insert into Person set ?', body, cb);
       }
    },
@@ -149,7 +169,7 @@ router.get('/:id', function(req, res) {
       req.cnn.query('select * from Person where id = ?', [req.params.id],
       function(err, prsArr) {
          /* Error is person does not exist */
-         if (vld.check(prsArr.length, Tags.notFound)) {
+         if (vld.check(prsArr.length, Tags.notFound, null)) {
             /* Password is not returned */
             delete prsArr[0].password;
             res.json(prsArr);
@@ -173,21 +193,26 @@ router.put('/:id', function(req, res) {
     "oldPassword"];
 
    async.waterfall([
-   function(cb) { 
+   function(cb) {
       /* All changes require the AU be the Person in 
        * question, or an admin. 
        */
       if (vld.checkPrsOK(req.params.id, cb) &&
-
+       
        /* Fields that are not allowed result in a bad value error */
        vld.hasOnlyFields(body, allowedFields, cb) &&
-
+       
        /* Unless AU is admin, an additional field oldPassword 
        * is required for changing password.
        */
-       vld.check(admin || (!body.password || (body.password && 
-        body.oldPassword)),
-        Tags.badValue, ["noOldPwd"], cb) &&
+       vld.check(!body.hasOwnProperty('password') || body.password,
+        Tags.badValue, ['password'], cb) &&
+       
+       vld.check((admin || !body.hasOwnProperty('password')) || 
+        (body.hasOwnProperty('password') && 
+        body.hasOwnProperty('oldPassword') &&
+        body.oldPassword),
+        Tags.noOldPwd, null, cb) &&
 
        /* Role changes result in BAD_REQUEST with 
         * badValue tag for nonadmins. 
@@ -201,13 +226,13 @@ router.put('/:id', function(req, res) {
    function(existingPrss, fields, cb) {
       /* Not found error if the person does not exist */
       if (vld.check(existingPrss.length, Tags.notFound, null, cb) &&
-
+       
        /* If AU is not admin, body password must match old password
        * if the password is being updated
        */
-       vld.check(admin || (!body.password || (!admin && body.password 
-       && body.oldPassword && body.oldPassword == existingPrss[0].password)),
-       Tags.badValue, ["oldPwdMismatch"], cb)) {
+       vld.check((admin || !body.hasOwnProperty('password')) || 
+        (body.oldPassword == existingPrss[0].password),
+        Tags.oldPwdMismatch, null, cb)) {
 
          /* Update person's information. */
          delete body.oldPassword;
@@ -231,13 +256,42 @@ router.put('/:id', function(req, res) {
 router.delete('/:id', function(req, res) {
    var vld = req.validator;
 
+   async.waterfall([
+   function(cb) {
+      req.cnn.chkQry('select * from Person where id = ?', req.params.id, cb);
+   },
+   
+   function(existingPrss, fields, cb) {   
+      /* Admin AU is required */
+      if (vld.checkAdmin() && vld.check(existingPrss.length, 
+       Tags.notFound, null, cb)) {
+         req.cnn.chkQry('DELETE from Person where id = ?', [req.params.id], cb);
+      }
+   },
+
+   function(result, fields, cb) {
+      res.status(200).end();
+      cb();
+   }],
+   
+   /* Finally, release the db connection. */
+   function(cb) {
+      req.cnn.release();
+   });
+});
+
+/* Delete a person from the db */
+/*
+router.delete('/:id', function(req, res) {
+   var vld = req.validator;
+*/
    /* Admin AU is required */
-   if (vld.checkAdmin()) {
+/*   if (vld.checkAdmin()) {
       req.cnn.query('DELETE from Person where id = ?', [req.params.id],
       function (err, result) {
-
+	 console.log(result);
          /* Not found error is person does not exist */
-         if (!err || vld.check(result.affectedRows, Tags.notFound)) {
+         /*if (!err || vld.check(result.affectedRows, Tags.notFound)) {
             res.status(200).end();
          }
          req.cnn.release();
@@ -248,5 +302,6 @@ router.delete('/:id', function(req, res) {
      req.cnn.release();
    }
 });
+*/
 
 module.exports = router;

@@ -21,7 +21,8 @@ Validator.Tags = {
    noOldPwd: "noOldPwd",            // Change of password requires an old password
    dupTitle: "dupTitle",            // Title duplicates an existing Conversation title
    dupEnrollment: "dupEnrollment",  // Duplicate enrollment
-   queryFailed: "queryFailed"
+   queryFailed: "queryFailed",
+   oldPwdMismatch: "oldPwdMismatch"
 };
 
 // Check |test|.  If false, add an error with tag and possibly empty array
@@ -41,6 +42,8 @@ Validator.prototype.check = function(test, tag, params, cb) {
       this.errors.push({tag: tag, params: params});
 
    if (this.errors.length) {
+      console.log(tag);
+      console.log(params);
       if (this.res) {
          if (this.errors[0].tag === Validator.Tags.noPermission)
             this.res.status(403).end();

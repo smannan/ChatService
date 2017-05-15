@@ -18,8 +18,10 @@ router.get('/', function(req, res) {
     * owner if query param is given
    */
    if (owner) {
+      console.log('GETTING CONVS FOR OWNER');
+      console.log(owner);
       query += ' where ownerId = ?';
-      params = [owner];
+      params = [parseInt(owner)];
    }
 
    req.cnn.chkQry(query, params,
@@ -68,8 +70,10 @@ router.post('/', function(req, res) {
 
    async.waterfall([
    function(cb) {
-      cnn.chkQry('select * from Conversation where title = ?', 
-       body.title, cb);
+      if (vld.check(body.title, Tags.missingField, ["title"], cb)) {
+         cnn.chkQry('select * from Conversation where title = ?', 
+          body.title, cb);
+      }
    },
 
    function(existingCnv, fields, cb) {
@@ -79,8 +83,6 @@ router.post('/', function(req, res) {
       */
       if (vld.chain(body.title.length < 80, Tags.badValue, null)
        .check(!existingCnv.length, Tags.dupTitle, null, cb)) {
-
-         console.log('POSTING NEW CNVS');
          body.ownerId = req.session.id;
          console.log(body);
          cnn.chkQry("insert into Conversation set ?", body, cb);
@@ -178,10 +180,10 @@ router.get('/:cnvId/Msgs', function(req, res) {
    var vld = req.validator;
    var cnvId = req.params.cnvId;
    var cnn = req.cnn;
-   var query = 'select whenMade, email, content, m.id as id from ' + 
+   var query = 'select unix_timestamp(whenMade) as whenMade, ' +
+    ' email, content, m.id as id from ' + 
     ' Conversation c join Message m on cnvId = c.id join Person ' +
-    ' p on prsId = p.id where c.id = ? and m.whenMade < ? ' +
-    ' order by whenMade asc';
+    ' p on prsId = p.id where c.id = ? '; 
 
    var params = [cnvId];
 
@@ -189,15 +191,11 @@ router.get('/:cnvId/Msgs', function(req, res) {
     * if specified in the request query.
     */
    if (req.query.dateTime) {
+      query += ' and m.whenMade < ? ' 
       params.push(req.query.dateTime);
    }
 
-   /* If not datetime is given, get all conversations
-    * posted before the current datetime.
-    */
-   else {
-      params.push(new Date());
-   }
+   query += ' order by m.whenMade asc, m.id asc ';
 
    /* And finally add a limit clause and parameter if indicated. */
    if (req.query.num) {
@@ -240,7 +238,9 @@ router.post('/:cnvId/Msgs', function(req, res) {
    async.waterfall([
    /* Get the existing conversation */
    function(cb) {
-      cnn.chkQry('select * from Conversation where id = ?', [cnvId], cb);
+      if (vld.check(body.content, Tags.missingField, ["content"], cb)) {
+         cnn.chkQry('select * from Conversation where id = ?', [cnvId], cb);
+      }
    },
 
    /* If the conversation exists and the body content is 
@@ -249,11 +249,18 @@ router.post('/:cnvId/Msgs', function(req, res) {
    function(cnvs, fields, cb) {
 
       if (vld.check(cnvs.length, Tags.notFound, null, cb) &&
-       vld.check(body.content.length < 500, Tags.badValue, 
+       vld.check(body.content && body.content.length < 500, Tags.badValue, 
         ["content"], cb)) {
+      
+         // new_message = {cnvId: cnvId, prsId: req.session.id,
+         // whenMade: date = new Date(), content: req.body.content};
+         
+         date = (new Date()).toISOString().slice(0, 19).replace('T', ' ');
+         // date = (new Date()).toTimeString();         
 
          new_message = {cnvId: cnvId, prsId: req.session.id,
-         whenMade: date = new Date(), content: req.body.content};
+         whenMade: date, content: req.body.content};
+ 
          cnn.chkQry("insert into Message set ?", [new_message], cb);
       }
    },

@@ -1,6 +1,6 @@
-drop database if exists cstaley;
-create database cstaley;
-use cstaley;
+drop database if exists smannan;
+create database smannan;
+use smannan;
 
 create table Person (
    id int auto_increment primary key,

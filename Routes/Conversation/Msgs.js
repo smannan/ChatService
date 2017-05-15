@@ -14,7 +14,8 @@ router.get('/:msgId', function(req, res) {
    var vld = req.validator;
    var msgId = req.params.msgId;
    var cnn = req.cnn;
-   var query = 'select whenMade, p.email, content from Message m' +
+   var query = 'select unix_timestamp(whenMade) as whenMade, ' +
+    ' p.email, content from Message m' +
     ' join Conversation c on cnvId = c.id join Person p on ' +
     ' prsId = p.id where m.id = ?';
    var params = [msgId];
