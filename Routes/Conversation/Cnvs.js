@@ -11,7 +11,9 @@ router.baseURL = '/Cnvs';
 */
 router.get('/', function(req, res) {
    var owner = req.query.owner;
-   var query = 'select id, title, ownerId, lastMessage from Conversation';
+   var query = 'select id, title, ownerId, ' + 
+    ' unix_timestamp(lastMessage) as lastMessage '
+    + ' from Conversation';
    var params = [];
 
    /* limited to Conversations with the specified 
@@ -45,8 +47,9 @@ router.get('/:cnvId', function(req, res) {
 
    async.waterfall([
    function(cb) {
-      cnn.chkQry('select id, title, ownerId, lastMessage from ' +
-       ' Conversation where id = ?', [req.params.cnvId], cb);
+      cnn.chkQry('select id, title, ownerId, ' + 
+       ' unix_timestamp(lastMessage) as lastMessage' +
+       ' from Conversation where id = ?', [req.params.cnvId], cb);
    },
 
    function(cnvs, fields, cb) {
