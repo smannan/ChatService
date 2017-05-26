@@ -42,6 +42,8 @@ router.post('/', function(req, res) {
          cookie = ssnUtil.makeSession(result[0], res);
          res.location(router.baseURL + '/' + cookie).status(200).end();
       }
+      console.log('LOGGING IN, NUMBER OF SESSIONS')
+      console.log(JSON.stringify(ssnUtil.sessions))
       cnn.release();
    });
 });
@@ -69,6 +71,9 @@ router.delete('/:cookie', function(req, res, next) {
       ssnUtil.deleteSession(req.params.cookie);
       res.status(200).end();
    }
+
+   console.log('SESSIONS AFTER DELELETING');
+   console.log(JSON.stringify(ssnUtil.sessions))
 
    req.cnn.release();
 });

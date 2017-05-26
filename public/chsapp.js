@@ -7,27 +7,14 @@ var app = angular.module('mainApp', [
 
 app.controller('translate_opt', ['$scope', '$rootScope',
    function($scope, $rootScope) {
-      if (!$scope.language) {
+      if (!$scope.lang) {
          $rootScope.language = 'EN'
-         $scope.language = 'EN'
-         $scope.options = [{'id':'English','val':'EN'}, 
-          {'id':'Spanish','val':'ES'}]
+         $scope.lang = 'EN'
       }
 
       $scope.change = function () {
-         $scope.language = ($scope.language === 'EN' ? 'EN' : 'ES')
-         
-         if ($scope.language === 'ES') {
-            $scope.options = [{'id':'English','val':'EN'},
-             {'id':'Spanish','val':'ES'}]
-         }
-
-         else {
-            $scope.options = [{'id':'English','val':'EN'},
-             {'id':'Spanish','val':'ES'}]
-         }
-         
-         $rootScope.language = $scope.language;
+         $scope.lang = ($scope.lang === 'EN' ? 'EN' : 'ES')
+         $rootScope.language = $scope.lang;
       }
 
 }]);
@@ -55,6 +42,22 @@ app.filter('tagError',
        (err.params ? err.params[0] : "");
    };
 }]);
+
+app.filter('translate', function() {
+   return function(input, language) {
+      if (language === "EN") {
+         return input
+      }
+      else {
+         if (input === 'English') {
+            return "Ingles"
+         }
+         else {
+            return "Espanol"
+         }
+      }
+   };
+});
 
 app.directive('cnvSummary', [function() {
    return {

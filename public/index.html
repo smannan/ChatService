@@ -44,10 +44,10 @@
          </li>
 
          <!--<li> -->
-         <select name="langSelect" ng-model="language" 
+         <select name="langSelect" ng-model="lang" 
          ng-controller="translate_opt" ng-change="change()">
-            <option value="EN">English</option>
-            <option value="ES">Spanish</option>
+            <option value="EN">{{'English' | translate:lang }}</option>
+            <option value="ES">{{'Spanish' | translate:lang }}</option>
          </select>
          <!--</li> -->
 

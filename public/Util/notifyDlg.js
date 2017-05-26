@@ -5,11 +5,15 @@ app.factory("notifyDlg", ["$uibModal", function(uibM) {
          scp.msg = msg;
          scp.hdr = hdr;
          scp.buttons = btns || ['OK'];
-         return uibM.open({
+         res = uibM.open({
             templateUrl: 'Util/notifyDlg.template.html',
             scope: scp,
             size: sz || 'sm'
          }).result;
+
+         console.log('RESULT')
+         console.log(res)
+         return res;
       }
    };
 }]);

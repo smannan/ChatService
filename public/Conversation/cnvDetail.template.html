@@ -9,7 +9,7 @@
 
 <div class="list-group">
    <div class="list-group-item" ng-repeat="msg in msgs">
-      <a> {{msg.email}} {{msg.whenMade | date : "medium"}} </a>
+      <a> {{msg.email}} {{msg.whenMade * 1000 | date : "medium" : '+1000'}} </a>
    </div>
 </div>
 
