@@ -1,6 +1,6 @@
 app.controller('registerController',
- ['$scope', '$state', '$http', 'notifyDlg',
- function($scope, $state, $http, nDlg) {
+ ['$scope', '$rootScope', '$state', '$http', 'notifyDlg', 'login',
+ function($scope, $rootScope, $state, $http, nDlg, login) {
    $scope.user = {role: 0};
    $scope.errors = [];
 
@@ -13,16 +13,19 @@ app.controller('registerController',
           "Login", ["Yes", "No"]);
       })
       .then(function(btn) {
-         if (btn == "Yes")
-            return $http.post("Ssns", $scope.user);
+         if (btn === "Yes") {
+            $rootScope.user = $scope.user;
+            //return $http.post("Ssns", $scope.user);
+            login.login($scope.user)
+         }
          else {
             $state.go('home');
          }
-      })
+      })/*
       .then(function(response) {
           var location = response.headers().location.split('/');
           return $http.get("Ssns/" + location[location.length - 1]);
-      })
+      })*/
       .then(function() {
           $state.go('home');
        })

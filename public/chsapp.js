@@ -10,10 +10,23 @@ app.controller('translate_opt', ['$scope', '$rootScope',
       if (!$scope.language) {
          $rootScope.language = 'EN'
          $scope.language = 'EN'
+         $scope.options = [{'id':'English','val':'EN'}, 
+          {'id':'Spanish','val':'ES'}]
       }
 
       $scope.change = function () {
          $scope.language = ($scope.language === 'EN' ? 'EN' : 'ES')
+         
+         if ($scope.language === 'ES') {
+            $scope.options = [{'id':'English','val':'EN'},
+             {'id':'Spanish','val':'ES'}]
+         }
+
+         else {
+            $scope.options = [{'id':'English','val':'EN'},
+             {'id':'Spanish','val':'ES'}]
+         }
+         
          $rootScope.language = $scope.language;
       }
 
