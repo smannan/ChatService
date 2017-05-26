@@ -1,5 +1,5 @@
 // Declare a service that allows an error message.
-app.factory("notifyDlg", ["$uibModel", function(uibM) {
+app.factory("notifyDlg", ["$uibModal", function(uibM) {
    return {
       show: function(scp, msg, hdr, btns, sz) {
          scp.msg = msg;

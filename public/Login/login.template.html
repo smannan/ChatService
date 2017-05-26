@@ -1,10 +1,19 @@
+<div class="panel panel-danger" ng-show="errors.length">
+  <h2 class="panel-heading">Please fix these problems</h2>
+  <ul>
+    <li ng-repeat="err in errors">{{err | tagError:language}}</li>
+  </ul>
+</div>
+
 <div>
    <form>
+   
       <fieldset class="form-group">
         <label>Email address</label>
         <input type="email" class="form-control" placeholder="Email"
          ng-model="user.email">
       </fieldset>
+
       <fieldset class="form-group">
         <label>Password</label>
         <input type="password" class="form-control" placeholder="Password"

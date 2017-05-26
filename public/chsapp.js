@@ -1,8 +1,23 @@
 
 var app = angular.module('mainApp', [
    'ui.router',
-   'ui.bootstrap'
-]);
+   'ui.bootstrap',
+   'pascalprecht.translate'
+]); 
+
+app.controller('translate_opt', ['$scope', '$rootScope',
+   function($scope, $rootScope) {
+      if (!$scope.language) {
+         $rootScope.language = 'EN'
+         $scope.language = 'EN'
+      }
+
+      $scope.change = function () {
+         $scope.language = ($scope.language === 'EN' ? 'EN' : 'ES')
+         $rootScope.language = $scope.language;
+      }
+
+}]);
 
 app.constant("errMap", {
    missingField: 'Field missing from request: ',
@@ -20,19 +35,53 @@ app.constant("errMap", {
    queryFailed: 'Query failed (server problem).'
 });
 
-app.filter('tagError', ['errMap', function(errMap) {
-   return function(err) {
-      return errMap[err.tag] + (err.params.length ? err.params[0] : "");
+app.filter('tagError', 
+   ['errMap', function(errMap) {
+   return function(err, language) {
+      return "[" + language + "] " + errMap[err.tag] + 
+       (err.params ? err.params[0] : "");
    };
 }]);
 
 app.directive('cnvSummary', [function() {
    return {
+      // match based on element tag
       restrict: 'E',
+
+      // creates an isolated scope for the specified 
+      // conversation
       scope: {
-         cnv: "=toSummarize"
+         cnv: "=toSummarize",
+         del: "&del",
+         edit: "&edit",
+         user: "=user"
       },
-      template: '<a  href="#" ui-sref="cnvDetail({cnvId:{{cnv.id}}})">' +
-       '{{cnv.title}} {{cnv.lastMessage | date : "medium"}}</a>'
+      templateUrl: 'Conversation/cnv.template.html'
    };
 }]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

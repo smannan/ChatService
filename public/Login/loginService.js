@@ -25,6 +25,7 @@ function($http) {
          .then(function() {
             user = null;
             cookie = null;
+            return user;
          });
       },
       getUser: function() {

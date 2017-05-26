@@ -3,7 +3,7 @@
          <div class="panel panel-danger" ng-show="errors.length">
             <h2 class="panel-heading">Please fix these problems</h2>
             <ul>
-               <li ng-repeat="err in errors">{{err | tagError}}</li>
+               <li ng-repeat="err in errors">{{err | tagError:language}}</li>
             </ul>
          </div>
 
@@ -12,27 +12,32 @@
          <input type="email" class="form-control" placeholder="Enter email"
           ng-model="user.email">
       </fieldset>
+
       <fieldset class="form-group">
          <label>First Name</label>
          <input type="text" class="form-control" placeholder="First Name"
           ng-model="user.firstName">
       </fieldset>
+
       <fieldset class="form-group">
          <label>Last Name</label>
          <input type="text" class="form-control" placeholder="Last Name"
-          ng-model="user.firstName">
+          ng-model="user.lastName">
       </fieldset>
+
       <fieldset class="form-group">
          <label>Password</label>
          <input type="password" class="form-control" placeholder="Password"
           ng-model="user.password">
       </fieldset>
+
       <fieldset class="form-group">
          <label>Password</label>
          <input type="password" class="form-control" placeholder="Password"
           ng-model="confPass">
          <h3 ng-if="confPass != user.password">Passwords do not match</h3>
       </fieldset>
+
       <div class="checkbox">
         <label>
            <input type="checkbox" ng-model="user.termsAccepted">
@@ -41,7 +46,8 @@
      </div>
 
       <button type="submit" class="btn btn-primary" ng-click="registerUser()"
-       ng-disabled="user.password !== confPass">Submit</button>
+       ng-disabled="!user.password || !user.email || !user.termsAccepted ||
+       (user.password !== confPass)">Submit</button>
       <button type="button" class="btn btn-warning" ng-click="quit()">Cancel</button>
    </form>
 </div>

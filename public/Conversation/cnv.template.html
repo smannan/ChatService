@@ -1,0 +1,13 @@
+<a href="#" ui-sref="cnvDetail({cnvId:{{cnv.id}}})">
+{{cnv.title}} {{cnv.lastMessage | date : "medium"}}
+</a>
+
+<button type="button" class="btn btn-default pull-right" 
+ ng-show="user && user.id == cnv.ownerId" ng-click="del({index : cnv.id})">
+<span class="glyphicon glyphicon-trash"></span>
+</button>
+
+<button type="button" class="btn btn-default btn-sm pull-right"
+  ng-show="user && user.id == cnv.ownerId" ng-click="edit({index: cnv.id})">
+   <span class="glyphicon glyphicon-edit"></span>
+</button>

@@ -1,0 +1,30 @@
+<h2>{{cnvs.title}}</h2>
+
+<div class="panel panel-danger" ng-show="errors.length">
+  <h2 class="panel-heading">Please fix these problems</h2>
+  <ul>
+    <li ng-repeat="err in errors">{{err | tagError:language}}</li>
+  </ul>
+</div>
+
+<div class="list-group">
+   <div class="list-group-item" ng-repeat="msg in msgs">
+      <a> {{msg.email}} {{msg.whenMade * 1000 | date : "medium"}} </a>
+   </div>
+</div>
+
+<div>
+   <form>
+      <fieldset class="form-group">
+        <label>Enter Content Here:</label>
+        <input type="text" class="form-control" placeholder="Your new message"
+         ng-model="content">
+      </fieldset>
+
+    <button class="btn btn-primary" type="button" 
+       style="margin-bottom:5px" ng-click="newMsg(content)"
+       ng-disabled="!content">
+       New Message
+    </button>
+  </form>
+</div>
