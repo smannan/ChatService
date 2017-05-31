@@ -9,7 +9,9 @@
 
 <div class="list-group">
    <div class="list-group-item" ng-repeat="msg in msgs">
-      <a> {{msg.email}} {{msg.whenMade * 1000 | date : "medium" : '+1000'}} </a>
+      <p ng-style='{"background-color":"#E6E6FA"}'> 
+      {{msg.email}} {{msg.whenMade * 1000 | date : "medium" : '+1000'}} </p>
+      <p> {{msg.content}} </p>
    </div>
 </div>
 
@@ -18,7 +20,7 @@
       <fieldset class="form-group">
         <label>Enter Content Here:</label>
         <input type="text" class="form-control" placeholder="Your new message"
-         ng-model="content">
+         ng-model="content" ng-style='{"height":"100px"}'>
       </fieldset>
 
     <button class="btn btn-primary" type="button" 

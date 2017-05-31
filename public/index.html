@@ -43,15 +43,29 @@
             <a ui-sref="myCnv({ownerId:{{user.id}}})">My Conversations</a>
          </li>
 
-         <!--<li> -->
+         <!--<li> 
          <select name="langSelect" ng-model="lang" 
          ng-controller="translate_opt" ng-change="change()">
             <option value="EN">{{'English' | translate:lang }}</option>
             <option value="ES">{{'Spanish' | translate:lang }}</option>
          </select>
-         <!--</li> -->
+         </li> -->
 
       </ul>
+
+      <ul class="nav navbar pull-right">
+         <li>
+         <select name="langSelect" ng-model="lang" 
+         ng-controller="translate_opt" ng-change="change()">
+            <option value="EN">{{'English' | translate:lang }}</option>
+            <option value="ES">{{'Spanish' | translate:lang }}</option>
+         </select>
+         </li>
+      </ul>
+
+      <ul class="nav navbar pull-right">
+         <li ng-if="!!user" > <a> {{user.firstName + " " + user.lastName}} </a> </li>
+      </ul> 
 
       <ul class="nav navbar pull-right">
          <li ng-if="!!user">
@@ -59,10 +73,6 @@
             ng-controller='logoutController'>Logout</a>
          </li>
       </ul>
-
-      <ul class="nav navbar pull-right">
-         <li ng-if="!!user" > <a> {{user.firstName + " " + user.lastName}} </a> </li>
-      </ul> 
 
    </nav>
    <ui-view/>

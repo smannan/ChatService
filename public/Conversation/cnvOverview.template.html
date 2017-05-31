@@ -11,7 +11,7 @@
    <div class="list-group-item" ng-repeat="cnv in cnvs">
 
       <cnv-summary to-summarize="cnv" ng-model="cnv" 
-       del=delCnv(index) edit=editCnv(index) user="user">
+       del=delCnv(cnv.id) edit=editCnv(cnv.id) user="user">
       </cnv-summary>
 
      <!--
