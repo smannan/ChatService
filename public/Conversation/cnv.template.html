@@ -1,5 +1,8 @@
 <a href="#" ui-sref="cnvDetail({cnvId:{{cnv.id}}})">
-{{cnv.title}} {{cnv.lastMessage * 1000 | date : "medium" : '+1000'}}
+{{cnv.title}} 
+</a>
+<a href="#" ui-sref="cnvDetail({cnvId:{{cnv.id}}})"
+ ng-if="cnv.lastMessage"> {{(cnv.lastMessage * 1000 | date : "medium")}}
 </a>
 
 <button type="button" class="btn btn-default pull-right" 

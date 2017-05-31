@@ -78,8 +78,10 @@ app.controller('cnvOverviewController',
          templateUrl: 'Conversation/delCnv.template.html',
          scope: $scope
       }).result
-      .then(function() {
-         $http.delete("/Cnvs/" + (index))
+      .then(function(btn) {
+         if (btn == 'OK') {
+            $http.delete("/Cnvs/" + (index))
+         }
       })
       .then(function() { // gets the newly created cnvs
          return $http.get('/Cnvs');
