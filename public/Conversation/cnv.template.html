@@ -1,5 +1,5 @@
 <a href="#" ui-sref="cnvDetail({cnvId:{{cnv.id}}})">
-{{cnv.title}} {{cnv.lastMessage | date : "medium"}}
+{{cnv.title}} {{cnv.lastMessage * 1000 | date : "medium" : '+1000'}}
 </a>
 
 <button type="button" class="btn btn-default pull-right" 

@@ -9,8 +9,8 @@
 
 <div class="list-group">
    <div class="list-group-item" ng-repeat="msg in msgs">
-      <p ng-style='{"background-color":"#E6E6FA"}'> 
-      {{msg.email}} {{msg.whenMade * 1000 | date : "medium" : '+1000'}} </p>
+      <p ng-style='{"background-color":"#E6E6FA"}'>
+      {{msg.email}} {{msg.whenMade * 1000 | date : "medium" : '0700'}} </p>
       <p> {{msg.content}} </p>
    </div>
 </div>
@@ -24,7 +24,7 @@
       </fieldset>
 
     <button class="btn btn-primary" type="button" 
-       style="margin-bottom:5px" ng-click="newMsg(content)"
+       ng-click="newMsg(content)"
        ng-disabled="!content">
        New Message
     </button>
