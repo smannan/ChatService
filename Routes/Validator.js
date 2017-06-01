@@ -10,16 +10,20 @@ var Validator = function(req, res) {
 Validator.Tags = {
    noLogin: "noLogin",              // No active session/login
    noPermission: "noPermission",    // Login lacks permission.
-   missingField: "missingField",    // Field missing from request. Params[0] is field name
-   badValue: "badValue",            // Field has bad value.  Params[0] gives field name
+   missingField: "missingField",    // Field missing from request. 
+                                    // Params[0] is field name
+   badValue: "badValue",            // Field has bad value.  
+                                    // Params[0] gives field name
    notFound: "notFound",            // Entity not present in DB
    badLogin: "badLogin",            // Email/password combination invalid
    dupEmail: "dupEmail",            // Email duplicates an existing email
    noTerms: "noTerms",              // Acceptance of terms is required.
    forbiddenRole: "forbiddenRole",  // Cannot set to this role
    forbiddenField: "forbiddenField",
-   noOldPwd: "noOldPwd",            // Change of password requires an old password
-   dupTitle: "dupTitle",            // Title duplicates an existing Conversation title
+   noOldPwd: "noOldPwd",            // Change of password requires 
+                                    // an old password
+   dupTitle: "dupTitle",            // Title duplicates an existing 
+                                    // Conversation title
    dupEnrollment: "dupEnrollment",  // Duplicate enrollment
    queryFailed: "queryFailed",
    oldPwdMismatch: "oldPwdMismatch"
@@ -84,7 +88,8 @@ Validator.prototype.hasFields = function(obj, fieldList, cb) {
    var self = this;
 
    fieldList.forEach(function(name) {
-      self.chain(obj.hasOwnProperty(name), Validator.Tags.missingField, [name]);
+      self.chain(obj.hasOwnProperty(name),
+       Validator.Tags.missingField, [name]);
    });
 
    return this.check(true, null, null, cb);
@@ -95,7 +100,8 @@ Validator.prototype.hasOnlyFields = function(obj, fieldList, cb) {
    var self = this;
 
    Object.keys(obj).forEach(function(key, index) {
-      self.chain(fieldList.indexOf(key) >= 0, Validator.Tags.forbiddenField, [key]);
+      self.chain(fieldList.indexOf(key) >= 0, 
+       Validator.Tags.forbiddenField, [key]);
    })
 
    return this.check(true, null, null, cb);

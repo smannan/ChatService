@@ -183,7 +183,13 @@ router.get('/:cnvId/Msgs', function(req, res) {
    var vld = req.validator;
    var cnvId = req.params.cnvId;
    var cnn = req.cnn;
-   var query = 'select unix_timestamp(whenMade) as whenMade, ' +
+   /*var query = 'select unix_timestamp(whenMade) as whenMade, ' +
+    ' email, content, m.id as id from ' + 
+    ' Conversation c join Message m on cnvId = c.id join Person ' +
+    ' p on prsId = p.id where c.id = ? '; 
+   */
+
+   var query = 'select whenMade, ' +
     ' email, content, m.id as id from ' + 
     ' Conversation c join Message m on cnvId = c.id join Person ' +
     ' p on prsId = p.id where c.id = ? '; 
@@ -221,6 +227,10 @@ router.get('/:cnvId/Msgs', function(req, res) {
 
    /* Return retrieved messages */
    function(msgs, fields, cb) { 
+      msgs.forEach( function(msg) {
+         msg.whenMade = msg.whenMade.getTime()
+      })
+      
       res.status(200).json(msgs);
       cb();
    }],
@@ -254,13 +264,8 @@ router.post('/:cnvId/Msgs', function(req, res) {
       if (vld.check(cnvs.length, Tags.notFound, null, cb) &&
        vld.check(body.content && body.content.length < 500, Tags.badValue, 
         ["content"], cb)) {
-      
-         // new_message = {cnvId: cnvId, prsId: req.session.id,
-         // whenMade: date = new Date(), content: req.body.content};
          
-         date = (new Date()).toISOString().slice(0, 19).replace('T', ' ');
-         // date = (new Date()).toTimeString();         
-
+         date = (new Date());
          new_message = {cnvId: cnvId, prsId: req.session.id,
          whenMade: date, content: req.body.content};
  

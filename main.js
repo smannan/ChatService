@@ -26,7 +26,8 @@ app.use(cookieParser());
 // Set up Session on req if available
 app.use(Session.router);
 
-// Check general login.  If OK, add Validator to |req| and continue processing,
+// Check general login.  If OK, add Validator to 
+// |req| and continue processing,
 // otherwise respond immediately with 401 and noLogin error tag.
 app.use(function(req, res, next) {
    if (req.session || (req.method === 'POST' &&
@@ -46,8 +47,10 @@ app.use('/Ssns', require('./Routes/Account/Ssns.js'));
 app.use('/Cnvs', require('./Routes/Conversation/Cnvs.js'));
 app.use('/Msgs', require('./Routes/Conversation/Msgs.js'));
 
-// Special debugging route for /DB DELETE.  Clears all table contents,
-// resets all auto_increment keys to start at 1, and reinserts one admin user.
+// Special debugging route for /DB DELETE.  
+// Clears all table contents,
+// resets all auto_increment keys to start at 1, 
+// and reinserts one admin user.
 app.delete('/DB', function(req, res) {
    var vld = req.validator;
    var cnn = req.cnn;
@@ -107,7 +110,8 @@ app.delete('/DB', function(req, res) {
    });
 });
 
-// Handler of last resort.  Print a stacktrace to console and send a 500 response.
+// Handler of last resort.  Print a stacktrace to console 
+// and send a 500 response.
 app.use(function(req, res, next) {
    res.status(404).end();
    req.cnn.release();

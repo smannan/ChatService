@@ -130,8 +130,6 @@ router.post('/', function(req, res) {
 
       /* Error duplicate email if the person exists */
       if (vld.check(!existingPrss.length, Tags.dupEmail, null, cb)) {
-         // body.termsAccepted = ((admin && !body.termsAccepted )&& new Date())
-         // || (body.termsAccepted && new Date());
          if (body.termsAccepted) { 
             body.termsAccepted = (new Date()).toISOString().slice(0, 19)
              .replace('T', ' ');
@@ -265,7 +263,8 @@ router.delete('/:id', function(req, res) {
       /* Admin AU is required */
       if (vld.checkAdmin() && vld.check(existingPrss.length, 
        Tags.notFound, null, cb)) {
-         req.cnn.chkQry('DELETE from Person where id = ?', [req.params.id], cb);
+         req.cnn.chkQry('DELETE from Person where id = ?', 
+          [req.params.id], cb);
       }
    },
 
@@ -279,29 +278,5 @@ router.delete('/:id', function(req, res) {
       req.cnn.release();
    });
 });
-
-/* Delete a person from the db */
-/*
-router.delete('/:id', function(req, res) {
-   var vld = req.validator;
-*/
-   /* Admin AU is required */
-/*   if (vld.checkAdmin()) {
-      req.cnn.query('DELETE from Person where id = ?', [req.params.id],
-      function (err, result) {
-	 console.log(result);
-         /* Not found error is person does not exist */
-         /*if (!err || vld.check(result.affectedRows, Tags.notFound)) {
-            res.status(200).end();
-         }
-         req.cnn.release();
-      });
-   }
-
-   else {
-     req.cnn.release();
-   }
-});
-*/
 
 module.exports = router;
