@@ -1,4 +1,5 @@
 
+
 app.config(['$stateProvider', '$urlRouterProvider',
    function($stateProvider, $router) {
 
@@ -68,7 +69,6 @@ app.config(['$stateProvider', '$urlRouterProvider',
          resolve: {
             cnvs: ['$q', '$http', '$stateParams', 
             function($q, $http, $stateParams) {
-               console.log($stateParams)
                return $http.get('/Cnvs?owner= ' + $stateParams.ownerId)
                .then(function(response) {
                   return response.data;

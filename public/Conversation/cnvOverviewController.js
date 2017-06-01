@@ -1,6 +1,6 @@
 app.controller('cnvOverviewController',
- ['$scope', '$state', '$http', '$uibModal', 'notifyDlg', 'cnvs',
- function($scope, $state, $http, $uibM, nDlg, cnvs) {
+ ['$scope', '$rootScope','$state', '$http', '$uibModal', 'notifyDlg', 'cnvs',
+ function($scope, $rootScope, $state, $http, $uibM, nDlg, cnvs) {
 
    $scope.cnvs = cnvs;
 
@@ -15,6 +15,7 @@ app.controller('cnvOverviewController',
          scope: $scope
       }).result
       .then(function(newTitle) { // posts a new cnvs
+         selectedTitle = newTitle;
          return $http.post("Cnvs", {title: newTitle});
       })
       .then(function() { // gets the newly created cnvs
@@ -23,21 +24,19 @@ app.controller('cnvOverviewController',
       .then(function(rsp) {
          $scope.cnvs = rsp.data;
       })
-      /*.catch(function(err) {
+      .catch(function(err) {
          // console.log("Error: " + JSON.stringify(err));
          if (err && err.data[0].tag == "dupTitle") {
-            nDlg.show($scope, "Another conversation already has title " + selectedTitle,
+            nDlg.show($scope, "Another conversation already has title " 
+             + selectedTitle,
              "Error");
-         }
-      });*/
-      .catch(function(err) {
-         if (err && err.data) {
-            $scope.errors = err.data;
          }
       });
    };
 
    $scope.editCnv = function(index) {
+      var selectedTitle;
+
       $http.get("/Cnvs/" + index).
       then(function(response) {
          $scope.title = response.title;
@@ -49,6 +48,7 @@ app.controller('cnvOverviewController',
             scope: $scope
          }).result.
          then(function(newTitle) {
+            selectedTitle = newTitle;
             return $http.put("/Cnvs/" + index, {title: newTitle});
          })
          .then(function() { // gets the newly created cnvs
@@ -57,30 +57,24 @@ app.controller('cnvOverviewController',
          .then(function(rsp) {
             $scope.cnvs = rsp.data;
          })
-         /*.catch(function(err) {
+         .catch(function(err) {
+            console.log($scope)
             if (err && err.data[0].tag == "dupTitle") {
-               nDlg.show($scope, "Another conversation already has title " + selectedTitle,
+               nDlg.show($scope, "Another conversation already has title " 
+                + selectedTitle,
                 "Error");
             }
-         }); */
-         .catch(function(err) {
-            if (err && err.data) {
-               $scope.errors = err.data;
-            }
          });
-
       })
    }
 
-   $scope.delCnv = function(index) {
-      console.log('OPENING dialog')
-      return $uibM.open({
-         templateUrl: 'Conversation/delCnv.template.html',
-         scope: $scope
-      }).result
+   $scope.delCnv = function(cnv) {
+      nDlg.show($scope, 'Delete conversation entitled ' +
+       cnv.title + '?', "Verify", ['Yes', 'No'])
+
       .then(function(btn) {
-         if (btn == 'OK') {
-            $http.delete("/Cnvs/" + (index))
+         if (btn == 'Yes') {
+            $http.delete("/Cnvs/" + (cnv.id))
          }
       })
       .then(function() { // gets the newly created cnvs
@@ -89,18 +83,13 @@ app.controller('cnvOverviewController',
       .then(function(rsp) {
          $scope.cnvs = rsp.data;
       })
-      /*.catch(function(err) {
+      .catch(function(err) {
          // console.log("Error: " + JSON.stringify(err));
          if (err && err.data[0].tag == "notFound") {
             nDlg.show($scope, "Conversation does not exist",
              "Error");
          }
-      })*/
-      .catch(function(err) {
-         if (err && err.data) {
-            $scope.errors = err.data;
-         }
-      });
+      })
    }
 }]);
 

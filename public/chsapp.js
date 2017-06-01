@@ -38,7 +38,11 @@ app.constant("errMap", {
 app.filter('tagError', 
    ['errMap', function(errMap) {
    return function(err, language) {
-      return "[" + language + "] " + errMap[err.tag] + 
+      res = ""
+      if (language !== 'EN') {
+         res += "[" + language + "] "
+      }
+      return  res + errMap[err.tag] + 
        (err.params ? err.params[0] : "");
    };
 }]);
@@ -70,7 +74,8 @@ app.directive('cnvSummary', [function() {
          cnv: "=toSummarize",
          del: "&del",
          edit: "&edit",
-         user: "=user"
+         user: "=user",
+         errors: "=errors"
       },
       templateUrl: 'Conversation/cnv.template.html'
    };

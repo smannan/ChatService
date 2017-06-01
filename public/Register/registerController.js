@@ -14,19 +14,24 @@ app.controller('registerController',
       })
       .then(function(btn) {
          if (btn === "Yes") {
-            $rootScope.user = $scope.user;
+            console.log('LOGGING IN')
             //return $http.post("Ssns", $scope.user);
-            login.login($scope.user)
+            login.login($scope.user) 
+              .then(function(user) {
+                $scope.user = user;
+                $rootScope.user = user;
+              })
          }
          else {
             $state.go('home');
          }
-      })/*
-      .then(function(response) {
+      })
+      /*.then(function(response) {
           var location = response.headers().location.split('/');
           return $http.get("Ssns/" + location[location.length - 1]);
       })*/
-      .then(function() {
+      .then(function(response) {
+          console.log($rootScope.user)
           $state.go('home');
        })
       .catch(function(err) {

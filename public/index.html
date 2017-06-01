@@ -40,19 +40,9 @@
          </li>
 
          <li ng-if="!!user">
-            <a ui-sref="myCnv({ownerId:{{user.id}}})">My Conversations</a>
+            <a ui-sref="myCnv({ownerId:{{'user.id'}}})">My Conversations</a>
          </li>
-
-         <!--<li> 
-         <select name="langSelect" ng-model="lang" 
-         ng-controller="translate_opt" ng-change="change()">
-            <option value="EN">{{'English' | translate:lang }}</option>
-            <option value="ES">{{'Spanish' | translate:lang }}</option>
-         </select>
-         </li> -->
-
       </ul>
-
       <ul class="nav navbar pull-right">
          <li>
          <select name="langSelect" ng-model="lang" 

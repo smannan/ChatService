@@ -5,6 +5,7 @@ function($http) {
 
    return {
       login: function(loginData) {
+         console.log('LOGGING IN')
          return $http.post("Ssns", loginData)
          .then(function(response) {
             var location = response.headers().location.split('/');
