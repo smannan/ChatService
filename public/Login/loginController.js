@@ -11,7 +11,8 @@ app.controller('loginController',
          $state.go('home');
       })
       .catch(function() {
-         nDlg.show($scope, "That name/password is not in our records", "Error");
+         nDlg.show($scope, "That name/password is not in our records", 
+          "Error");
       });
    };
 }]);

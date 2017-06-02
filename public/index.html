@@ -20,6 +20,7 @@
 <script src="Login/logoutController.js"></script>
 <script src="Login/loginService.js"></script>
 <script src="Conversation/cnvOverviewController.js"></script>
+<script src="Conversation/myCnvOverviewController.js"></script>
 <script src="Conversation/cnvDetailController.js"></script>
 <script src="ui-routes.js"></script>
 
@@ -40,7 +41,7 @@
          </li>
 
          <li ng-if="!!user">
-            <a ui-sref="myCnv({ownerId:{{'user.id'}}})">My Conversations</a>
+            <a ui-sref="myCnv({ownerId:{{user.id}}})">My Conversations</a>
          </li>
       </ul>
       <ul class="nav navbar pull-right">

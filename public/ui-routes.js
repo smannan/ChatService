@@ -65,7 +65,7 @@ app.config(['$stateProvider', '$urlRouterProvider',
       .state('myCnv', {
          url: '/myCnvs/:ownerId',
          templateUrl: 'Conversation/cnvOverview.template.html',
-         controller: 'cnvOverviewController',
+         controller: 'myCnvOverviewController',
          resolve: {
             cnvs: ['$q', '$http', '$stateParams', 
             function($q, $http, $stateParams) {
